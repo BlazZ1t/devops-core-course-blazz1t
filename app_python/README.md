@@ -1,3 +1,5 @@
+[![Test Python App](https://github.com/BlazZ1t/devops-core-course-blazz1t/actions/workflows/python-ci.yml/badge.svg)](https://github.com/BlazZ1t/devops-core-course-blazz1t/actions/workflows/python-ci.yml)
+
 ### Overview 
 
 This is a service that sends basic information about the server it runs on, about the app itself, and can do a health check (so it doesn't have to go to a hospital).

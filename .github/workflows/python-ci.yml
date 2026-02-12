@@ -1,9 +1,22 @@
 name: Test Python App
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'app_python/docs/'
+      - 'app_python/README.md'
+    paths:
+      - 'app_python/'
+  pull_request:
+    paths-ignore:
+      - 'app_python/docs/'
+      - 'app_python/README.md'
+    paths:
+      - 'app_python/'
 
 jobs:
   test:
+    name: Test/Lint app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,6 +29,11 @@ jobs:
         run: flake8 app_python/app.py app_python/tests/
       - name: Run pytest
         run: pytest .
+  push:
+    name: Push docker image to Dockerhub
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -32,3 +50,6 @@ jobs:
           context: app_python/
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME  }}/devops_app:latest, ${{ secrets.DOCKERHUB_USERNAME  }}/devops_app:${{ steps.current-time.outputs.time }}
+
+
+    
