@@ -2,16 +2,14 @@ name: Test Python App
 
 on:
   push:
-    paths-ignore:
-      - 'app_python/docs/'
-      - 'app_python/README.md'
     paths:
+      - '!app_python/docs/'
+      - '!app_python/README.md'
       - 'app_python/'
   pull_request:
-    paths-ignore:
-      - 'app_python/docs/'
-      - 'app_python/README.md'
     paths:
+      - '!app_python/docs/'
+      - '!app_python/README.md'
       - 'app_python/'
 
 jobs:
