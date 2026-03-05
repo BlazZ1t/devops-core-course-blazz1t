@@ -1,10 +1,55 @@
 ---
-- name: Update apt cache
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
+- name: Common role tasks
+  block:
 
-- name: Install common packages
-  ansible.builtin.apt:
-    name: "{{ common_packages }}"
-    state: present
+    - name: Package management
+      block:
+
+        - name: Update apt cache
+          ansible.builtin.apt:
+            update_cache: true
+            cache_valid_time: 3600
+
+        - name: Install common packages
+          ansible.builtin.apt:
+            name: "{{ common_packages }}"
+            state: present
+
+      rescue:
+
+        - name: Attempt to fix apt cache and retry
+          ansible.builtin.command: apt-get update --fix-missing
+          changed_when: false
+
+      always:
+
+        - name: Log package block completion
+          ansible.builtin.file:
+            path: /tmp/ansible_packages_completed
+            state: touch
+
+      tags:
+        - packages
+
+    - name: User management
+      block:
+
+        - name: Ensure default user exists
+          ansible.builtin.user:
+            name: deploy
+            state: present
+            create_home: true
+
+      always:
+
+        - name: Log user block completion
+          ansible.builtin.file:
+            path: /tmp/ansible_users_completed
+            state: touch
+
+      tags:
+        - users
+
+  become: true
+  tags:
+    - common

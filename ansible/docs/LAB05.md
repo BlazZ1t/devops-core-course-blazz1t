@@ -29,7 +29,7 @@ ansible/
 │   │   ├── defaults/main.yml
 │   │   ├── tasks/main.yml
 │   │   └── handlers/main.yml
-│   └── app_deploy/
+│   └── web_app/
 │       ├── defaults/main.yml
 │       ├── tasks/main.yml
 │       └── handlers/main.yml
@@ -76,7 +76,7 @@ Roles separate provisioning and deployment concerns, reduce duplication, and mak
 - **Handlers:** `restart docker`
 - **Dependencies:** none (used after `common` in `provision.yml`)
 
-### Role: `app_deploy`
+### Role: `web_app`
 
 - **Purpose:** authenticate to Docker Hub and deploy/update Python app container.
 - **Tasks:**
