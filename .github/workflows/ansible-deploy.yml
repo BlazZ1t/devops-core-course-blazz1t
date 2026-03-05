@@ -66,7 +66,8 @@ jobs:
       - name: Run Ansible playbook
         run: |
           cd ansible
-          ansible-playbook playbooks/site.yml
+          ansible-playbook playbooks/provision.yml
+          ansible-playbook playbooks/deploy.yml
 
       - name: Verify deployment
         run: |
