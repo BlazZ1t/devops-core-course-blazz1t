@@ -27,6 +27,7 @@ formatter = jsonlogger.JsonFormatter(
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global START_TIME_UTC
@@ -54,6 +55,7 @@ app = FastAPI(
     openapi_url=None,
     lifespan=lifespan
 )
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
