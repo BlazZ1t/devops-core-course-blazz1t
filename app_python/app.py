@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Request
+import logging
+from pythonjsonlogger import jsonlogger
 import os
 import socket
 import platform
@@ -14,14 +16,37 @@ HOST = os.getenv('HOST', '0.0.0.0')
 PORT = int(os.getenv('PORT', 5000))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter(
+    "%(asctime)s %(levelname)s %(message)s %(name)s"
+)
+
+logHandler.setFormatter(formatter)
+logger.addHandler(logHandler)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("recording start time")
+    global START_TIME_UTC
+
     START_TIME_UTC = round(time.time())
-    print(START_TIME_UTC)
+
+    logger.info(
+        "Application startup",
+        extra={
+            "service": SERVICE_NAME,
+            "version": VERSION,
+            "host": HOST,
+            "port": PORT,
+            "debug": DEBUG
+        }
+    )
+
     yield
-    print("Clean up...")
+
+    logger.info("Application shutdown")
 
 app = FastAPI(
     docs_url=None,
@@ -29,6 +54,46 @@ app = FastAPI(
     openapi_url=None,
     lifespan=lifespan
 )
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+
+    client_ip = request.client.host
+    method = request.method
+    path = request.url.path
+    user_agent = request.headers.get("user-agent")
+
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+
+    except Exception as e:
+        logger.exception(
+            "Request failed",
+            extra={
+                "method": method,
+                "path": path,
+                "client_ip": client_ip
+            }
+        )
+        raise e
+
+    process_time = round((time.time() - start_time) * 1000, 2)
+
+    logger.info(
+        "HTTP request",
+        extra={
+            "method": method,
+            "path": path,
+            "status_code": status_code,
+            "client_ip": client_ip,
+            "user_agent": user_agent,
+            "duration_ms": process_time
+        }
+    )
+
+    return response
 
 
 def get_system_info():
