@@ -74,8 +74,8 @@ async def metrics_middleware(request: Request, call_next):
     except Exception:
         status_code = 500
         http_requests_total.labels(method=method,
-                                    endpoint=endpoint,
-                                      status_code=status_code).inc()
+                                   endpoint=endpoint,
+                                   status_code=status_code).inc()
         http_requests_in_progress.dec()
         raise
 
