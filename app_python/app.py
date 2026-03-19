@@ -7,7 +7,8 @@ import platform
 import time
 import datetime
 from contextlib import asynccontextmanager
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import Counter, Histogram
+from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
 
 SERVICE_NAME = os.getenv("SERVICE_NAME", "devops-info-service")
@@ -72,7 +73,9 @@ async def metrics_middleware(request: Request, call_next):
         status_code = response.status_code
     except Exception:
         status_code = 500
-        http_requests_total.labels(method=method, endpoint=endpoint, status_code=status_code).inc()
+        http_requests_total.labels(method=method,
+                                    endpoint=endpoint,
+                                      status_code=status_code).inc()
         http_requests_in_progress.dec()
         raise
 
@@ -159,7 +162,6 @@ def get_health():
         "uptime_seconds": round(time.time()) - START_TIME_UTC
     }
 
-# --- Prometheus Metrics ---
 
 http_requests_total = Counter(
     'http_requests_total',
@@ -190,11 +192,13 @@ system_info_duration = Histogram(
     'System info collection time'
 )
 
+
 def normalize_path(request: Request):
     route = request.scope.get("route")
     if route and hasattr(route, "path"):
         return route.path
     return request.url.path
+
 
 @app.get("/metrics")
 def metrics():
