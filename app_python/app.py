@@ -7,6 +7,8 @@ import platform
 import time
 import datetime
 from contextlib import asynccontextmanager
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from starlette.responses import Response
 
 SERVICE_NAME = os.getenv("SERVICE_NAME", "devops-info-service")
 VERSION = os.getenv("VERSION", "1.0.0")
@@ -58,42 +60,36 @@ app = FastAPI(
 
 
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
+async def metrics_middleware(request: Request, call_next):
     start_time = time.time()
-
-    client_ip = request.client.host
+    endpoint = normalize_path(request)
     method = request.method
-    path = request.url.path
-    user_agent = request.headers.get("user-agent")
+
+    http_requests_in_progress.inc()
 
     try:
         response = await call_next(request)
         status_code = response.status_code
+    except Exception:
+        status_code = 500
+        http_requests_total.labels(method=method, endpoint=endpoint, status_code=status_code).inc()
+        http_requests_in_progress.dec()
+        raise
 
-    except Exception as e:
-        logger.exception(
-            "Request failed",
-            extra={
-                "method": method,
-                "path": path,
-                "client_ip": client_ip
-            }
-        )
-        raise e
+    duration = time.time() - start_time
 
-    process_time = round((time.time() - start_time) * 1000, 2)
+    http_requests_total.labels(
+        method=method,
+        endpoint=endpoint,
+        status_code=status_code
+    ).inc()
 
-    logger.info(
-        "HTTP request",
-        extra={
-            "method": method,
-            "path": path,
-            "status_code": status_code,
-            "client_ip": client_ip,
-            "user_agent": user_agent,
-            "duration_ms": process_time
-        }
-    )
+    http_request_duration_seconds.labels(
+        method=method,
+        endpoint=endpoint
+    ).observe(duration)
+
+    http_requests_in_progress.dec()
 
     return response
 
@@ -162,3 +158,44 @@ def get_health():
         "timestamp": datetime.datetime.now().isoformat(),
         "uptime_seconds": round(time.time()) - START_TIME_UTC
     }
+
+# --- Prometheus Metrics ---
+
+http_requests_total = Counter(
+    'http_requests_total',
+    'Total HTTP requests',
+    ['method', 'endpoint', 'status_code']
+)
+
+http_request_duration_seconds = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request duration',
+    ['method', 'endpoint']
+)
+
+http_requests_in_progress = Gauge(
+    'http_requests_in_progress',
+    'HTTP requests currently being processed'
+)
+
+# --- App-specific metrics ---
+endpoint_calls = Counter(
+    'devops_info_endpoint_calls',
+    'Endpoint calls',
+    ['endpoint']
+)
+
+system_info_duration = Histogram(
+    'devops_info_system_collection_seconds',
+    'System info collection time'
+)
+
+def normalize_path(request: Request):
+    route = request.scope.get("route")
+    if route and hasattr(route, "path"):
+        return route.path
+    return request.url.path
+
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
