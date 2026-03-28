@@ -119,7 +119,6 @@ def get_runtime_info():
 
 def get_endpoints():
     result = []
-
     for route in app.routes:
         result.append(
             {
