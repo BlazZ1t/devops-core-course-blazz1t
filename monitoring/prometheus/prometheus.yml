@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+storage:
+  tsdb:
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Your FastAPI app
+  - job_name: 'app'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['devops-python-app:5000']
+
+  # Loki metrics
+  - job_name: 'loki'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['loki:3100']
+
+  # Grafana metrics
+  - job_name: 'grafana'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['grafana:3000']
