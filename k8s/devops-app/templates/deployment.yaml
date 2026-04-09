@@ -18,6 +18,10 @@ spec:
     metadata:
       labels:
         {{- include "devops-app.selectorLabels" . | nindent 8 }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "myapp-role"
+        vault.hashicorp.com/agent-inject-secret-config: "secret/data/myapp/config"
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -50,3 +54,6 @@ spec:
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          envFrom:
+          - secretRef:
+              name: {{ include "devops-app.fullname" . }}-secret

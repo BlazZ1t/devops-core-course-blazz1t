@@ -9,6 +9,11 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+secrets:
+  username: "placeholder-user"
+  password: "placeholder-pass"
+
+
 service:
   type: NodePort
   port: 80
