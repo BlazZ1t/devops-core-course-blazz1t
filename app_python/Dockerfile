@@ -8,10 +8,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create persistence directory
-RUN mkdir -p data
+RUN mkdir -p /data
 
 # Declare volume
-VOLUME ["data"]
+VOLUME ["/data"]
 
 EXPOSE 5000
 

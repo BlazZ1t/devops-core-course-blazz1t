@@ -93,17 +93,18 @@ async def metrics_middleware(request: Request, call_next):
     ).observe(duration)
 
     http_requests_in_progress.dec()
-
-    with open('data/visits', 'r+') as f:
-        try:
-            visits = int(f.readline())
-        except ValueError:
-            visits = 0
-        visits += 1
-        f.seek(0)
-        f.truncate(0)
-        f.write(str(visits))
-
+    try:            
+        with open('/data/visits', 'r+') as f:
+            try:
+                visits = int(f.readline())
+            except ValueError:
+                visits = 0
+            visits += 1
+            f.seek(0)
+            f.truncate(0)
+            f.write(str(visits))
+    except Exception as e:
+        pass
     return response
 
 
@@ -174,12 +175,15 @@ def get_health():
 
 @app.get("/visits")
 def get_visits():
-    with open('data/visits', 'r') as f:
-        visits = f.readline()
-    if len(visits) == 0:
-        visits = 0
-    else:
-        visits = int(visits)
+    try:
+        with open('/data/visits', 'r') as f:
+            visits = f.readline()
+        if len(visits) == 0:
+            visits = 0
+        else:
+            visits = int(visits)
+    except Exception as e:
+        pass
     return {"visits": visits}
 
 
