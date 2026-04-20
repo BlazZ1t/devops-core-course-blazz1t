@@ -94,6 +94,16 @@ async def metrics_middleware(request: Request, call_next):
 
     http_requests_in_progress.dec()
 
+    with open('/data/visits', 'r+') as f:
+        try:
+            visits = int(f.readline())
+        except ValueError:
+            visits = 0
+        visits += 1
+        f.seek(0)
+        f.truncate(0)
+        f.write(visits)
+
     return response
 
 
@@ -160,6 +170,16 @@ def get_health():
         "timestamp": datetime.datetime.now().isoformat(),
         "uptime_seconds": round(time.time()) - START_TIME_UTC
     }
+
+@app.get("/visits")
+def get_visits():
+    with open('/data/visits', 'r') as f:
+        visits = f.readline()
+    if len(visits) == 0:
+        visits = 0
+    else:
+        visits = int(visits)
+    return {"visits": visits}
 
 
 http_requests_total = Counter(
