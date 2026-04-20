@@ -35,6 +35,16 @@ logger.addHandler(logHandler)
 async def lifespan(app: FastAPI):
     global START_TIME_UTC
 
+    try:
+        os.makedirs("/data", exist_ok=True)
+
+        # Create visits file if missing
+        if not os.path.exists('/data/visits'):
+            with open('/data/visits', "w") as f:
+                f.write("0")
+    except Exception:
+        pass
+
     START_TIME_UTC = round(time.time())
 
     logger.info(
