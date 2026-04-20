@@ -3,7 +3,7 @@ replicaCount: 5
 
 image:
   repository: blazz1t/devops_app
-  tag: "2026.03.28"  # Specific version for production
+  tag: "latest"  # Specific version for production
   pullPolicy: IfNotPresent
 
 service:
@@ -46,3 +46,13 @@ container:
     - "--port"
     - "8000"
   port: 8000
+
+config:
+  environment: "prod"
+  logLevel: "INFO"
+  serviceName: "devops-info-service"
+
+persistence:
+  enabled: true
+  size: 500Mi
+  storageClass: ""

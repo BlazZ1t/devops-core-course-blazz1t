@@ -47,3 +47,13 @@ container:
     - "--port"
     - "8000"
   port: 8000
+
+config:
+  environment: "dev"
+  logLevel: "DEBUG"
+  serviceName: "devops-info-service"
+
+persistence:
+  enabled: true
+  size: 100Mi
+  storageClass: ""

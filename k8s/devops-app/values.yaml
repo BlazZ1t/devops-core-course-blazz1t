@@ -13,6 +13,15 @@ secrets:
   username: "placeholder-user"
   password: "placeholder-pass"
 
+config:
+  environment: "dev"
+  logLevel: "INFO"
+  serviceName: "devops-info-service"
+
+persistence:
+  enabled: true
+  size: 100Mi
+  storageClass: ""  # Use cluster default
 
 service:
   type: NodePort

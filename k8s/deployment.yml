@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
         - name: devops-app
-          image: blazz1t/devops_app:2026.03.28
-          args: ["--port", "8000"]
+          image: blazz1t/devops_app:latest
+          args: ["--port", "8000", "-v", "visits_data:/data"]
           ports:
             - containerPort: 8000
 

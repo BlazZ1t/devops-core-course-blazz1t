@@ -22,6 +22,8 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "myapp-role"
         vault.hashicorp.com/agent-inject-secret-config: "secret/data/myapp/config"
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config-env: {{ include (print $.Template.BasePath "/configmap-env.yaml") . | sha256sum }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -55,5 +57,23 @@ spec:
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           envFrom:
-          - secretRef:
-              name: {{ include "devops-app.fullname" . }}-secret
+            - secretRef:
+                name: {{ include "devops-app.fullname" . }}-secret
+            - configMapRef:
+                name: {{ include "devops-app.fullname" . }}-env
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            {{- if .Values.persistence.enabled }}
+            - name: data-volume
+              mountPath: /data
+            {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "devops-app.fullname" . }}-config
+        {{- if .Values.persistence.enabled }}
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ include "devops-app.fullname" . }}-data
+        {{- end }}
