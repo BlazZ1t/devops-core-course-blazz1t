@@ -182,9 +182,9 @@ def get_visits():
             visits = 0
         else:
             visits = int(visits)
+        return {"visits": visits}
     except Exception:
-        pass
-    return {"visits": visits}
+        return
 
 
 http_requests_total = Counter(
