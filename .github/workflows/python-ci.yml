@@ -20,7 +20,7 @@ jobs:
       - name: Run linter
         run: flake8 app_python/app.py app_python/tests/
       - name: Run pytest
-        run: pytest .
+        run: cd app_python && pytest .
   push:
     name: Push docker image to Dockerhub
     runs-on: ubuntu-latest
