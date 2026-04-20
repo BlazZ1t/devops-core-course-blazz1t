@@ -171,6 +171,7 @@ def get_health():
         "uptime_seconds": round(time.time()) - START_TIME_UTC
     }
 
+
 @app.get("/visits")
 def get_visits():
     with open('/data/visits', 'r') as f:
