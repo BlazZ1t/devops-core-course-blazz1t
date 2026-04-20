@@ -93,7 +93,7 @@ async def metrics_middleware(request: Request, call_next):
     ).observe(duration)
 
     http_requests_in_progress.dec()
-    try:            
+    try:
         with open('/data/visits', 'r+') as f:
             try:
                 visits = int(f.readline())
@@ -103,7 +103,7 @@ async def metrics_middleware(request: Request, call_next):
             f.seek(0)
             f.truncate(0)
             f.write(str(visits))
-    except Exception as e:
+    except Exception:
         pass
     return response
 
@@ -182,7 +182,7 @@ def get_visits():
             visits = 0
         else:
             visits = int(visits)
-    except Exception as e:
+    except Exception:
         pass
     return {"visits": visits}
 
