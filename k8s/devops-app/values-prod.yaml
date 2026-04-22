@@ -1,0 +1,58 @@
+# Production environment configuration
+replicaCount: 5
+
+image:
+  repository: blazz1t/devops_app
+  tag: "latest"  # Specific version for production
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+  protocol: TCP
+  name: http
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+probes:
+  liveness:
+    path: /health
+    port: 8000
+    initialDelaySeconds: 30  # Longer initial delay for production
+    periodSeconds: 5          # More frequent checks
+    timeoutSeconds: 2
+    failureThreshold: 3
+  readiness:
+    path: /health
+    port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 3          # More frequent readiness checks
+    timeoutSeconds: 2
+    failureThreshold: 3
+
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 0
+
+container:
+  args:
+    - "--port"
+    - "8000"
+  port: 8000
+
+config:
+  environment: "prod"
+  logLevel: "INFO"
+  serviceName: "devops-info-service"
+
+persistence:
+  enabled: true
+  size: 500Mi
+  storageClass: ""
