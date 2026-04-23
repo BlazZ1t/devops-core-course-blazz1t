@@ -1,0 +1,14 @@
+{
+  "app_name": "devops-info-service",
+  "environment": "dev",
+  "version": "1.0.0",
+  "features": {
+    "visits_counter": true,
+    "metrics": true,
+    "health_check": true
+  },
+  "settings": {
+    "log_level": "INFO",
+    "data_path": "/data/visits"
+  }
+}
