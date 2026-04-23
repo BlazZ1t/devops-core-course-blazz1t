@@ -28,3 +28,9 @@ For custom config there are flags `--host` and `--port` for setting the host and
 
 SERVICE_NAME - sets service name
 VERSION - sets service version
+
+### Docker
+
+* To build a docker image run `docker build [-t image_name] .`. command.
+* To run a container run `docker run [-d] [image_name]` (-d for detached (doesn't stay in your terminal))
+* To run pull the existent image from Docker Hub run `docker pull blazz1t/devops_app:1.0.0`
