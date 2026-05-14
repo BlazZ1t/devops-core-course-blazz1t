@@ -1,16 +1,10 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: {{ include "devops-app.fullname" . }}
-  labels:
-    {{- include "devops-app.labels" . | nindent 4 }}
 spec:
+  serviceName: {{ include "devops-app.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
-      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
   selector:
     matchLabels:
       {{- include "devops-app.selectorLabels" . | nindent 6 }}
@@ -77,8 +71,11 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "devops-app.fullname" . }}-data
         {{- end }}
-  strategy:
-    blueGreen:
-      activeService: {{ include "devops-app.fullname" . }}-service
-      previewService: {{ include "devops-app.fullname" . }}-preview
-      autoPromotionEnabled: false
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
