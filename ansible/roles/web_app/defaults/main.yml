@@ -1,0 +1,19 @@
+---
+app_name: devops-app
+
+docker_image: "{{ dockerhub_username }}/{{ app_name }}"
+docker_tag: latest
+
+web_app_wipe: false
+
+app_port: 5000
+app_internal_port: 5000
+
+compose_project_dir: "/opt/{{ app_name }}"
+docker_compose_version: "3.8"
+
+app_container_name: "{{ app_name }}"
+
+app_restart_policy: unless-stopped
+
+app_environment: {}
