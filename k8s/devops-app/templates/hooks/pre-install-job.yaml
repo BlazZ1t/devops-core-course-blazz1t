@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "devops-app.fullname" . }}-pre-install"
+  labels:
+    {{- include "devops-app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: "{{ include "devops-app.fullname" . }}-pre-install"
+      labels:
+        {{- include "devops-app.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: pre-install-job
+        image: alpine:latest
+        command: ['sh', '-c', 'echo "🚀 Pre-install hook starting at $(date)" && sleep 5 && echo "✅ Pre-install hook completed"']
