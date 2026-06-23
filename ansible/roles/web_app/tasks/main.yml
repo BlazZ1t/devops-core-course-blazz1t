@@ -1,0 +1,37 @@
+---
+- name: Include wipe tasks
+  ansible.builtin.include_tasks: wipe.yml
+  tags:
+    - web_app_wipe
+
+- name: Deploy application with Docker Compose
+  block:
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "/opt/{{ app_name }}"
+        state: directory
+        mode: "0755"
+
+    - name: Template docker-compose file
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "/opt/{{ app_name }}/docker-compose.yml"
+        mode: "0644"
+
+    - name: Deploy application using Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "/opt/{{ app_name }}"
+        pull: always
+        state: present
+        recreate: auto
+
+  rescue:
+
+    - name: Log deployment failure
+      ansible.builtin.debug:
+        msg: "Application deployment failed for {{ app_name }}"
+
+  tags:
+    - app_deploy
+    - compose
